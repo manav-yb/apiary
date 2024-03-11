@@ -44,7 +44,6 @@ public class ProfileBenchmark {
             blobIDs.add(blob.getBlobId());
         }
         storage.delete(blobIDs);
-        logger.info("Cleanup done: {}ms", System.currentTimeMillis() - tDelete);
 
         ThreadLocal<ApiaryWorkerClient> client = ThreadLocal.withInitial(() -> new ApiaryWorkerClient("localhost"));
         AtomicInteger profileIDs = new AtomicInteger(0);
@@ -57,7 +56,6 @@ public class ProfileBenchmark {
             String image = String.format("src/test/resources/stanford%d.jpg", profileID % 2);
             client.get().executeFunction("PostgresProfileUpdate", profileID, name, status, image).getInt();
         }
-        logger.info("Loading done: {}ms", System.currentTimeMillis() - tLoad);
 
         ExecutorService threadPool = Executors.newFixedThreadPool(threadPoolSize);
         long startTime = System.currentTimeMillis();
@@ -113,9 +111,7 @@ public class ProfileBenchmark {
             double throughput = (double) numQueries * 1000.0 / elapsedTime;
             long p50 = queryTimes.get(numQueries / 2);
             long p99 = queryTimes.get((numQueries * 99) / 100);
-            logger.info("Reads: Duration: {} Interval: {}μs Queries: {} TPS: {} Average: {}μs p50: {}μs p99: {}μs", elapsedTime, interval, numQueries, String.format("%.03f", throughput), average, p50, p99);
         } else {
-            logger.info("No reads");
         }
 
         queryTimes = writeTimes.stream().map(i -> i / 1000).sorted().collect(Collectors.toList());
@@ -125,13 +121,10 @@ public class ProfileBenchmark {
             double throughput = (double) numQueries * 1000.0 / elapsedTime;
             long p50 = queryTimes.get(numQueries / 2);
             long p99 = queryTimes.get((numQueries * 99) / 100);
-            logger.info("Writes: Duration: {} Interval: {}μs Queries: {} TPS: {} Average: {}μs p50: {}μs p99: {}μs", elapsedTime, interval, numQueries, String.format("%.03f", throughput), average, p50, p99);
         } else {
-            logger.info("No writes");
         }
 
         threadPool.shutdown();
         threadPool.awaitTermination(100000, TimeUnit.SECONDS);
-        logger.info("All queries finished! {}", System.currentTimeMillis() - startTime);
     }
 }

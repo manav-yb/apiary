@@ -93,7 +93,6 @@ public class MoodleBenchmark {
         apiaryWorker.registerConnection(ApiaryConfig.postgres, pgConn);
 
         if ((bugFix != null) && bugFix.equalsIgnoreCase("subscribe")) {
-            logger.info("Use Moodle bug fix: {}", MDLSubscribeTxn.class.getName());
             // Use the bug fix: transactional version.
             apiaryWorker.registerFunction(MDLUtil.FUNC_IS_SUBSCRIBED, ApiaryConfig.postgres, MDLSubscribeTxn::new, true);
         } else {
@@ -115,12 +114,9 @@ public class MoodleBenchmark {
             ApiaryConfig.captureFuncInvocations = false;
             int[] resList = client.get().executeFunction(MDLUtil.FUNC_FETCH_SUBSCRIBERS, initialForumId).getIntArray();
             if (resList.length > 1) {
-                logger.info("Replay found duplications!");
             } else {
-                logger.info("Replay found no duplications.");
             }
             apiaryWorker.shutdown();
-            logger.info("Replay mode {}, execution time: {} ms", retroMode, elapsedTime);
             return;
         }
 
@@ -150,7 +146,6 @@ public class MoodleBenchmark {
             loadUsers[i] = 0; // Initial user 0;
         }
         int loadedRows = client.get().executeFunction(MDLUtil.FUNC_LOAD_DATA, loadUsers, loadForums).getInt();
-        logger.info("Loaded {} rows of data.", loadedRows);
 
         long startTime = System.currentTimeMillis();
         long endTime = startTime + (duration * 1000 + threadWarmupMs);
@@ -208,7 +203,6 @@ public class MoodleBenchmark {
             totalThroughput += throughput;
             long p50 = queryTimes.get(numQueries / 2);
             long p99 = queryTimes.get((numQueries * 99) / 100);
-            logger.info("Forum Reads: Duration: {} Interval: {}μs Queries: {} TPS: {} Average: {}μs p50: {}μs p99: {}μs", elapsedTime, interval, numQueries, String.format("%.03f", throughput), average, p50, p99);
         } else {
             logger.info("No reads.");
         }
@@ -221,11 +215,9 @@ public class MoodleBenchmark {
             totalThroughput += throughput;
             long p50 = queryTimes.get(numQueries / 2);
             long p99 = queryTimes.get((numQueries * 99) / 100);
-            logger.info("Forum Writes: Duration: {} Interval: {}μs Queries: {} TPS: {} Average: {}μs p50: {}μs p99: {}μs", elapsedTime, interval, numQueries, String.format("%.03f", throughput), average, p50, p99);
         } else {
             logger.info("No writes");
         }
-        logger.info("Total Throughput: {}", totalThroughput);
 
         apiaryWorker.shutdown();
     }

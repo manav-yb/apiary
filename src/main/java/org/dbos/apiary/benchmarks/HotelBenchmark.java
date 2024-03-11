@@ -48,7 +48,6 @@ public class HotelBenchmark {
             client.get().executeFunction("PostgresAddHotel", hotelNum, "hotel" + hotelNum, Integer.MAX_VALUE, longitude, latitude);
         }
         mconn.database.getCollection("hotels").createIndex(Indexes.geo2dsphere("point"));
-        logger.info("Done Loading: {}", System.currentTimeMillis() - loadStart);
 
         if (ApiaryConfig.XDBTransactions) {
             mconn.database.getCollection("hotels").createIndex(Indexes.ascending(MongoContext.beginVersion));
@@ -106,7 +105,6 @@ public class HotelBenchmark {
             double throughput = (double) numQueries * 1000.0 / elapsedTime;
             long p50 = queryTimes.get(numQueries / 2);
             long p99 = queryTimes.get((numQueries * 99) / 100);
-            logger.info("Searches: Duration: {} Interval: {}μs Queries: {} TPS: {} Average: {}μs p50: {}μs p99: {}μs", elapsedTime, interval, numQueries, String.format("%.03f", throughput), average, p50, p99);
         } else {
             logger.info("No searches");
         }
@@ -118,13 +116,11 @@ public class HotelBenchmark {
             double throughput = (double) numQueries * 1000.0 / elapsedTime;
             long p50 = queryTimes.get(numQueries / 2);
             long p99 = queryTimes.get((numQueries * 99) / 100);
-            logger.info("Reservations: Duration: {} Interval: {}μs Queries: {} TPS: {} Average: {}μs p50: {}μs p99: {}μs", elapsedTime, interval, numQueries, String.format("%.03f", throughput), average, p50, p99);
         } else {
             logger.info("No reservations");
         }
 
         threadPool.shutdown();
         threadPool.awaitTermination(100000, TimeUnit.SECONDS);
-        logger.info("All queries finished! {}", System.currentTimeMillis() - startTime);
     }
 }

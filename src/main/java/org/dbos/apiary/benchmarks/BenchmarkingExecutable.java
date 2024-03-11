@@ -20,7 +20,7 @@ public class BenchmarkingExecutable {
         Options options = new Options();
         options.addOption("b", true, "Which Benchmark?");
         options.addOption("d", true, "Duration (sec)?");
-        options.addOption("i", true, "Benchmark Interval (μs)");
+        options.addOption("i", true, "Benchmark Interval ");
         options.addOption("mainHostAddr", true, "Address of the main host to connect to.");
         options.addOption("s", true, "Bench/App Name ([moodle, wordpress, tpcc] in retro benchmark)");
         options.addOption("p1", true, "Percentage 1");
@@ -82,63 +82,51 @@ public class BenchmarkingExecutable {
         String roleBench = benchmark;
         if (cmd.hasOption("s")) {
             roleBench = cmd.getOptionValue("s");
-            logger.info("Benchmark role name: {}", roleBench);
         }
         if (benchmark.equals("increment")) {
-            logger.info("Increment Benchmark");
             IncrementBenchmark.benchmark(mainHostAddr, roleBench, interval, duration, false);
         } else if (benchmark.equals("stateless-increment")) {
-            logger.info("Stateless Increment Benchmark");
             IncrementBenchmark.benchmark(mainHostAddr, roleBench, interval, duration, true);
         } else if (benchmark.equals("retwis")) {
-            logger.info("Retwis Benchmark");
             RetwisBenchmark.benchmark(mainHostAddr, roleBench, interval, duration);
         } else if (benchmark.equals("esmicro")) {
             int percentageRead = cmd.hasOption("p1") ? Integer.parseInt(cmd.getOptionValue("p1")) : 100;
             int percentageNew = cmd.hasOption("p2") ? Integer.parseInt(cmd.getOptionValue("p2")) : 0;
             int percentageUpdate = cmd.hasOption("p3") ? Integer.parseInt(cmd.getOptionValue("p3")) : 0;
-            logger.info("Elasticsearch Microbenchmark {} {} {}", percentageRead, percentageNew, percentageUpdate);
             ElasticsearchMicrobenchmark.benchmark(mainHostAddr, interval, duration, percentageRead, percentageNew, percentageUpdate);
         } else if (benchmark.equals("shop")) {
             int percentageGetItem = cmd.hasOption("p1") ? Integer.parseInt(cmd.getOptionValue("p1")) : 90;
             int percentageCheckout = cmd.hasOption("p2") ? Integer.parseInt(cmd.getOptionValue("p2")) : 8;
             int percentageAppend = cmd.hasOption("p3") ? Integer.parseInt(cmd.getOptionValue("p3")) : 1;
             int percentageUpdate = cmd.hasOption("p4") ? Integer.parseInt(cmd.getOptionValue("p4")) : 1;
-            logger.info("ShopBenchmark {} {} {} {}", percentageGetItem, percentageCheckout, percentageAppend, percentageUpdate);
             ShopBenchmark.benchmark(mainHostAddr, interval, duration, percentageGetItem, percentageCheckout, percentageAppend, percentageUpdate);
         } else if (benchmark.equals("hotel")) {
             int percentageSearch = cmd.hasOption("p1") ? Integer.parseInt(cmd.getOptionValue("p1")) : 80;
             int percentageReserve = cmd.hasOption("p2") ? Integer.parseInt(cmd.getOptionValue("p2")) : 20;
-            logger.info("Hotel Benchmark {} {}", percentageSearch, percentageReserve);
             HotelBenchmark.benchmark(mainHostAddr, interval, duration, percentageSearch, percentageReserve);
         } else if (benchmark.equals("mongomicro")) {
             int percentageRead = cmd.hasOption("p1") ? Integer.parseInt(cmd.getOptionValue("p1")) : 100;
             int percentageNew = cmd.hasOption("p2") ? Integer.parseInt(cmd.getOptionValue("p2")) : 0;
             int percentageUpdate = cmd.hasOption("p3") ? Integer.parseInt(cmd.getOptionValue("p3")) : 0;
-            logger.info("Mongo Microbenchmark {} {} {}", percentageRead, percentageNew, percentageUpdate);
             MongoMicrobenchmark.benchmark(mainHostAddr, interval, duration, percentageRead, percentageNew, percentageUpdate);
         } else if (benchmark.equals("profile")) {
             int percentageRead = cmd.hasOption("p1") ? Integer.parseInt(cmd.getOptionValue("p1")) : 90;
             int percentageNew = cmd.hasOption("p2") ? Integer.parseInt(cmd.getOptionValue("p2")) : 10;
             int percentageUpdate = cmd.hasOption("p3") ? Integer.parseInt(cmd.getOptionValue("p3")) : 0;
-            logger.info("Profile Benchmark {} {} {}", percentageRead, percentageNew, percentageUpdate);
             ProfileBenchmark.benchmark(interval, duration, percentageRead, percentageNew, percentageUpdate);
         } else if (benchmark.equals("gcsmicro")) {
             int percentageRead = cmd.hasOption("p1") ? Integer.parseInt(cmd.getOptionValue("p1")) : 100;
             int percentageNew = cmd.hasOption("p2") ? Integer.parseInt(cmd.getOptionValue("p2")) : 0;
             int percentageUpdate = cmd.hasOption("p3") ? Integer.parseInt(cmd.getOptionValue("p3")) : 0;
-            logger.info("GCS Microbenchmark Benchmark {} {} {}", percentageRead, percentageNew, percentageUpdate);
             GCSMicrobenchmark.benchmark(interval, duration, percentageRead, percentageNew, percentageUpdate);
         } else if (benchmark.equals("superbenchmark")) {
             int percentageRead = cmd.hasOption("p1") ? Integer.parseInt(cmd.getOptionValue("p1")) : 99;
             int percentageUpdate = cmd.hasOption("p2") ? Integer.parseInt(cmd.getOptionValue("p2")) : 1;
-            logger.info("Superbenchmark {} {}", percentageRead, percentageUpdate);
             Superbenchmark.benchmark(mainHostAddr, interval, duration, percentageRead, percentageUpdate);
         } else if (benchmark.equals("mysqlmicro")) {
             int percentageRead = cmd.hasOption("p1") ? Integer.parseInt(cmd.getOptionValue("p1")) : 100;
             int percentageNew = cmd.hasOption("p2") ? Integer.parseInt(cmd.getOptionValue("p2")) : 0;
             int percentageUpdate = cmd.hasOption("p3") ? Integer.parseInt(cmd.getOptionValue("p3")) : 0;
-            logger.info("Mysql Microbenchmark {} {} {}", percentageRead, percentageNew, percentageUpdate);
             MysqlMicrobenchmark.benchmark(mainHostAddr, interval, duration, percentageRead, percentageNew, percentageUpdate);
         } else if (benchmark.equals("retro")) {
             int p1 = cmd.hasOption("p1") ? Integer.parseInt(cmd.getOptionValue("p1")) : 0;
@@ -146,7 +134,6 @@ public class BenchmarkingExecutable {
             int p3 = cmd.hasOption("p3") ? Integer.parseInt(cmd.getOptionValue("p3")) : 0;
             int p4 = cmd.hasOption("p4") ? Integer.parseInt(cmd.getOptionValue("p4")) : 0;
             int p5 = cmd.hasOption("p5") ? Integer.parseInt(cmd.getOptionValue("p5")) : 0;
-            logger.info("Retroactive Benchmark, App: {}, Percentages: {}, {}, {}, {}, {}", roleBench, p1, p2, p3, p4, p5);
             int retroMode = 0;
             long startExecId = 0l;
             long endExecId = cmd.hasOption("endExecId") ? Long.parseLong(cmd.getOptionValue("endExecId")) : Long.MAX_VALUE;
@@ -156,9 +143,7 @@ public class BenchmarkingExecutable {
                 if (retroMode > 0) {
                     startExecId = Long.parseLong(cmd.getOptionValue("execId"));
                 }
-                logger.info("Replay mode {}, startExecId: {}, endExecId: {}", retroMode, startExecId, endExecId);
             } else {
-                logger.info("Not replay mode.");
             }
             RetroBenchmark.benchmark(roleBench, mainHostAddr, interval, duration, skipLoadData, retroMode, startExecId, endExecId, bugFix, List.of(p1, p2, p3, p4, p5));
         }

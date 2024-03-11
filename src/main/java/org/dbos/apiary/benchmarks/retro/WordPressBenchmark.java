@@ -159,7 +159,7 @@ public class WordPressBenchmark {
         int updateOptionPC = percentages.get(4);
         int totalPostPC = addCommentPC + getCommentsPC + trashPostPC + untrashPostPC;
         int totalOptionPC = 100 - totalPostPC;
-        logger.info("Percentages: addComment {}, trashPost {}, untrashPost {}, getComments {}, updateOption {}, getOption {}", addCommentPC, trashPostPC, untrashPostPC, getCommentsPC, updateOptionPC, totalOptionPC - updateOptionPC);
+        //logger.info("Percentages: addComment {}, trashPost {}, untrashPost {}, getComments {}, updateOption {}, getOption {}", addCommentPC, trashPostPC, untrashPostPC, getCommentsPC, updateOptionPC, totalOptionPC - updateOptionPC);
 
         boolean hasProv = ApiaryConfig.recordInput ? true : false;  // Enable provenance?
 
@@ -210,15 +210,15 @@ public class WordPressBenchmark {
         if (bugFix != null) {
             // The fixed version.
             if (bugFix.equalsIgnoreCase("comment")) {
-                logger.info("Use WordPress bug fix for comment: {}", WPAddCommentFixed.class.getName());
+                //logger.info("Use WordPress bug fix for comment: {}", WPAddCommentFixed.class.getName());
                 apiaryWorker.registerFunction(WPUtil.FUNC_ADDCOMMENT, ApiaryConfig.postgres, WPAddCommentFixed::new, true);
             } else if (bugFix.equalsIgnoreCase("option")) {
-                logger.info("Use WordPress bug fix for option: {}", WPInsertOptionFixed.class.getName());
+                //logger.info("Use WordPress bug fix for option: {}", WPInsertOptionFixed.class.getName());
                 apiaryWorker.registerFunction(WPUtil.FUNC_INSERTOPTION, ApiaryConfig.postgres, WPInsertOptionFixed::new, true);
             }
         } else {
             // The buggy version.
-            logger.info("Use WordPress buggy version: {}, {}", WPAddComment.class.getName(), WPInsertOption.class.getName());
+            //logger.info("Use WordPress buggy version: {}, {}", WPAddComment.class.getName(), WPInsertOption.class.getName());
         }
 
         apiaryWorker.startServing();
@@ -269,7 +269,7 @@ public class WordPressBenchmark {
             commentId.addAndGet(numPosts * initCommentsPerPost);
             if (res > 0) {
                 long loadTime = System.currentTimeMillis() - t0;
-                logger.info("Loaded {} posts and comments in {} ms", res, loadTime);
+                //logger.info("Loaded {} posts and comments in {} ms", res, loadTime);
             } else {
                 logger.error("Failed to load posts and comments! {}", res);
                 return;
@@ -301,7 +301,7 @@ public class WordPressBenchmark {
                 // Check inconsistency.
                 resList = client.get().executeFunction(WPUtil.FUNC_COMMENTSTATUS, numTry).getStringArray();
                 if (resList.length > 1) {
-                    logger.info("Found inconsistency in WP Posts!");
+                    //logger.info("Found inconsistency in WP Posts!");
                     foundInconsistency = true;
                     break;
                 }
@@ -339,7 +339,7 @@ public class WordPressBenchmark {
                 String resStr = client.get().executeFunction(WPUtil.FUNC_GETOPTION, "option-" + numTry).getString();
                 assert (resStr.contains("value"));
                 if (res2 == -1) {
-                    logger.info("Found error! Option: {}", numTry);
+                    //logger.info("Found error! Option: {}", numTry);
                     break;
                 }
             }
@@ -359,7 +359,7 @@ public class WordPressBenchmark {
             int res = client.get().executeFunction(WPUtil.FUNC_LOAD_OPTIONS, numTry + 1, numOptions.get()).getInt();
             if (res > 0) {
                 long loadTime = System.currentTimeMillis() - t0;
-                logger.info("Loaded {} options in {} ms", res, loadTime);
+                //logger.info("Loaded {} options in {} ms", res, loadTime);
             } else {
                 logger.error("Failed to load options! {}", res);
                 return;
@@ -441,9 +441,7 @@ public class WordPressBenchmark {
             totalThroughput += throughput;
             long p50 = queryTimes.get(numQueries / 2);
             long p99 = queryTimes.get((numQueries * 99) / 100);
-            logger.info("Total Reads: Duration: {} Interval: {}μs Queries: {} TPS: {} Average: {}μs p50: {}μs p99: {}μs", elapsedTime, interval, numQueries, String.format("%.03f", throughput), average, p50, p99);
         } else {
-            logger.info("No reads.");
         }
 
         queryTimes = writeTimes.stream().map(i -> i / 1000).sorted().collect(Collectors.toList());
@@ -454,11 +452,9 @@ public class WordPressBenchmark {
             totalThroughput += throughput;
             long p50 = queryTimes.get(numQueries / 2);
             long p99 = queryTimes.get((numQueries * 99) / 100);
-            logger.info("Total Writes: Duration: {} Interval: {}μs Queries: {} TPS: {} Average: {}μs p50: {}μs p99: {}μs", elapsedTime, interval, numQueries, String.format("%.03f", throughput), average, p50, p99);
         } else {
-            logger.info("No writes");
+            //logger.info("No writes");
         }
-        logger.info("Total Throughput: {}", totalThroughput);
 
         apiaryWorker.shutdown();
     }
@@ -483,7 +479,7 @@ public class WordPressBenchmark {
             pgConn.createTable(WPUtil.WP_OPTIONS_TABLE, WPUtil.WP_OPTIONS_SCHEMA);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("Failed to connect to Postgres.");
+            //logger.info("Failed to connect to Postgres.");
             throw new RuntimeException("Failed to connect to Postgres.");
         }
     }
@@ -503,7 +499,7 @@ public class WordPressBenchmark {
             pgConn.createTable(WPUtil.WP_OPTIONS_TABLE, WPUtil.WP_OPTIONS_SCHEMA);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("Failed to connect to Postgres.");
+            //logger.info("Failed to connect to Postgres.");
             throw new RuntimeException("Failed to connect to Postgres.");
         }
     }

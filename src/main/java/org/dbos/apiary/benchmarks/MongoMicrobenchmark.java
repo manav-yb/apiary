@@ -48,7 +48,6 @@ public class MongoMicrobenchmark {
         }
         client.get().executeFunction("PostgresBulkAddPerson", names, nums);
         client.get().executeFunction("PostgresFindPerson", "matei" + 0);
-        logger.info("Done loading {} people: {}ms", numPeople, System.currentTimeMillis() - loadStart);
 
         if (ApiaryConfig.XDBTransactions) {
             mconn.database.getCollection("people").createIndex(Indexes.ascending(MongoContext.beginVersion));
@@ -113,9 +112,7 @@ public class MongoMicrobenchmark {
             double throughput = (double) numQueries * 1000.0 / elapsedTime;
             long p50 = queryTimes.get(numQueries / 2);
             long p99 = queryTimes.get((numQueries * 99) / 100);
-            logger.info("Reads: Duration: {} Interval: {}μs Queries: {} TPS: {} Average: {}μs p50: {}μs p99: {}μs", elapsedTime, interval, numQueries, String.format("%.03f", throughput), average, p50, p99);
         } else {
-            logger.info("No reads");
         }
 
         queryTimes = writeTimes.stream().map(i -> i / 1000).sorted().collect(Collectors.toList());
@@ -125,13 +122,10 @@ public class MongoMicrobenchmark {
             double throughput = (double) numQueries * 1000.0 / elapsedTime;
             long p50 = queryTimes.get(numQueries / 2);
             long p99 = queryTimes.get((numQueries * 99) / 100);
-            logger.info("Writes: Duration: {} Interval: {}μs Queries: {} TPS: {} Average: {}μs p50: {}μs p99: {}μs", elapsedTime, interval, numQueries, String.format("%.03f", throughput), average, p50, p99);
         } else {
-            logger.info("No writes");
         }
 
         threadPool.shutdown();
         threadPool.awaitTermination(100000, TimeUnit.SECONDS);
-        logger.info("All queries finished! {}", System.currentTimeMillis() - startTime);
     }
 }

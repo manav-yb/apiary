@@ -41,7 +41,6 @@ public class ElasticsearchMicrobenchmark {
             DeleteIndexRequest request = new DeleteIndexRequest.Builder().index("people").build();
             esClient.indices().delete(request);
         } catch (Exception e) {
-            logger.info("Index Not Deleted {}", e.getMessage());
         }
         esClient.shutdown();
 
@@ -64,7 +63,6 @@ public class ElasticsearchMicrobenchmark {
             }
             client.get().executeFunction("PostgresBulkIndexPerson", initialNames, initialNumbers);
         }
-        logger.info("Done Loading: {}", System.currentTimeMillis() - loadStart);
 
         ExecutorService threadPool = Executors.newFixedThreadPool(threadPoolSize);
         long startTime = System.currentTimeMillis();
@@ -125,9 +123,7 @@ public class ElasticsearchMicrobenchmark {
             double throughput = (double) numQueries * 1000.0 / elapsedTime;
             long p50 = queryTimes.get(numQueries / 2);
             long p99 = queryTimes.get((numQueries * 99) / 100);
-            logger.info("Duration: {} Interval: {}μs Queries: {} TPS: {} Average: {}μs p50: {}μs p99: {}μs", elapsedTime, interval, numQueries, String.format("%.03f", throughput), average, p50, p99);
         } else {
-            logger.info("No reads");
         }
 
         queryTimes = writeTimes.stream().map(i -> i / 1000).sorted().collect(Collectors.toList());
@@ -137,14 +133,11 @@ public class ElasticsearchMicrobenchmark {
             double throughput = (double) numQueries * 1000.0 / elapsedTime;
             long p50 = queryTimes.get(numQueries / 2);
             long p99 = queryTimes.get((numQueries * 99) / 100);
-            logger.info("Duration: {} Interval: {}μs Queries: {} TPS: {} Average: {}μs p50: {}μs p99: {}μs", elapsedTime, interval, numQueries, String.format("%.03f", throughput), average, p50, p99);
         } else {
-            logger.info("No writes");
         }
 
         threadPool.shutdown();
         threadPool.awaitTermination(100000, TimeUnit.SECONDS);
-        logger.info("All queries finished! {}", System.currentTimeMillis() - startTime);
         System.exit(0); // ES client is bugged and won't exit.
     }
 

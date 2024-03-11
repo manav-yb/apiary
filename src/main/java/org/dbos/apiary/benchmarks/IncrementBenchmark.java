@@ -121,6 +121,5 @@ public class IncrementBenchmark {
         double throughput = (double) numQueries * 1000.0 / elapsedTime;
         long p50 = queryTimes.get(numQueries / 2);
         long p99 = queryTimes.get((numQueries * 99) / 100);
-        logger.info("Duration: {} Interval: {}μs Queries: {} TPS: {} Average: {}μs p50: {}μs p99: {}μs", elapsedTime, interval, numQueries, String.format("%.03f", throughput), average, p50, p99);
     }
 }

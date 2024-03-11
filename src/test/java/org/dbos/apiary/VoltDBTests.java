@@ -72,7 +72,6 @@ public class VoltDBTests {
             return;
         }
         int numPartitions = ctxt.getNumPartitions();
-        logger.info("Detected {} partitions.", numPartitions);
         assertTrue(numPartitions > 0);
 
         HashMap<Integer, String> partitionHostMap = (HashMap)((HashMap)ctxt.getPartitionHostMap()).clone();
@@ -80,7 +79,6 @@ public class VoltDBTests {
         for (int p : partitionHostMap.keySet()) {
             String hn = partitionHostMap.get(p);
             assertEquals(localhost, hn);
-            logger.info("partition {} --> host {}", p, hn);
         }
         assertEquals(numPartitions, partitionHostMap.size());
 
@@ -178,10 +176,8 @@ public class VoltDBTests {
                 long recvTs = System.nanoTime();
                 long elapse = (recvTs - senderTs) / 1000;
                 assertTrue(elapse > 0);
-                logger.info("Elapsed time: {} μs", elapse);
 
                 long actualElapse = (recvTs - actualSendTime) / 1000;
-                logger.info("Actual elapsed time: {} μs", actualElapse);
                 recvCnt++;
             }
         }

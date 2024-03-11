@@ -71,7 +71,6 @@ public class TPCCBenchmark {
             RetroBenchmark.retroReplayExec(client.get(), retroMode, startExecId, endExecId);
             long elapsedTime = System.currentTimeMillis() - startTime;
             apiaryWorker.shutdown();
-            logger.info("Replay mode {}, execution time: {} ms", retroMode, elapsedTime);
             return;
         }
 
@@ -127,9 +126,7 @@ public class TPCCBenchmark {
             totalThroughput += throughput;
             long p50 = queryTimes.get(numQueries / 2);
             long p99 = queryTimes.get((numQueries * 99) / 100);
-            logger.info("Payment: Duration: {} Interval: {}μs Queries: {} TPS: {} Average: {}μs p50: {}μs p99: {}μs", elapsedTime, interval, numQueries, String.format("%.03f", throughput), average, p50, p99);
         } else {
-            logger.info("No Payment.");
         }
 
         queryTimes = newOrderTimes.stream().map(i -> i / 1000).sorted().collect(Collectors.toList());
@@ -140,11 +137,8 @@ public class TPCCBenchmark {
             totalThroughput += throughput;
             long p50 = queryTimes.get(numQueries / 2);
             long p99 = queryTimes.get((numQueries * 99) / 100);
-            logger.info("New Order: Duration: {} Interval: {}μs Queries: {} TPS: {} Average: {}μs p50: {}μs p99: {}μs", elapsedTime, interval, numQueries, String.format("%.03f", throughput), average, p50, p99);
         } else {
-            logger.info("No NewOrder");
         }
-        logger.info("Total Throughput: {}", totalThroughput);
 
         apiaryWorker.shutdown();
     }
@@ -234,7 +228,6 @@ public class TPCCBenchmark {
     }
 
     private static void resetAllTables(String dbAddr) {
-        logger.info("Reset all tables!");
         try {
             PostgresConnection pgConn = new PostgresConnection(dbAddr, ApiaryConfig.postgresPort, "postgres", "dbos", RetroBenchmark.provenanceDB, RetroBenchmark.provenanceAddr);
             Connection provConn = pgConn.provConnection.get();
@@ -244,7 +237,6 @@ public class TPCCBenchmark {
             PostgresConnection.dropTable(provConn, ApiaryConfig.tableRecordedInputs);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("Failed to connect to Postgres.");
         }
     }
 }

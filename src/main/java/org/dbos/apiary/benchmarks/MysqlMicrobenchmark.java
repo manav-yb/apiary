@@ -66,7 +66,6 @@ public class MysqlMicrobenchmark {
         ThreadLocal<ApiaryWorkerClient> client = ThreadLocal.withInitial(() -> new ApiaryWorkerClient("localhost"));
 
         if (BenchmarkingExecutable.skipLoadData) {
-            logger.info("Skip loading data, {} people", numPeople);
         } else {
             mysqlConn.dropTable("PersonTable");
             if (ApiaryConfig.XDBTransactions) {
@@ -96,7 +95,6 @@ public class MysqlMicrobenchmark {
 
             int res = client.get().executeFunction("PostgresMysqlSoloQueryPerson", "matei" + (numPeople - 1)).getInt();
             assert (res == 0);
-            logger.info("Done loading {} people: {}ms", numPeople, System.currentTimeMillis() - loadStart);
         }
 
         AtomicInteger personNums = new AtomicInteger(numPeople);
@@ -157,7 +155,6 @@ public class MysqlMicrobenchmark {
             double throughput = (double) numQueries * 1000.0 / elapsedTime;
             long p50 = queryTimes.get(numQueries / 2);
             long p99 = queryTimes.get((numQueries * 99) / 100);
-            logger.info("Reads: Duration: {} Interval: {}μs Queries: {} TPS: {} Average: {}μs p50: {}μs p99: {}μs", elapsedTime, interval, numQueries, String.format("%.03f", throughput), average, p50, p99);
         } else {
             logger.info("No reads");
         }
@@ -169,7 +166,6 @@ public class MysqlMicrobenchmark {
             double throughput = (double) numQueries * 1000.0 / elapsedTime;
             long p50 = queryTimes.get(numQueries / 2);
             long p99 = queryTimes.get((numQueries * 99) / 100);
-            logger.info("Inserts: Duration: {} Interval: {}μs Queries: {} TPS: {} Average: {}μs p50: {}μs p99: {}μs", elapsedTime, interval, numQueries, String.format("%.03f", throughput), average, p50, p99);
         } else {
             logger.info("No inserts");
         }
@@ -181,7 +177,6 @@ public class MysqlMicrobenchmark {
             double throughput = (double) numQueries * 1000.0 / elapsedTime;
             long p50 = queryTimes.get(numQueries / 2);
             long p99 = queryTimes.get((numQueries * 99) / 100);
-            logger.info("Updates: Duration: {} Interval: {}μs Queries: {} TPS: {} Average: {}μs p50: {}μs p99: {}μs", elapsedTime, interval, numQueries, String.format("%.03f", throughput), average, p50, p99);
         } else {
             logger.info("No updates");
         }
@@ -190,7 +185,6 @@ public class MysqlMicrobenchmark {
         threadPool.awaitTermination(100000, TimeUnit.SECONDS);
 
         apiaryWorker.shutdown();
-        logger.info("All queries finished! {}", System.currentTimeMillis() - startTime);
         System.exit(0);
     }
 }

@@ -39,7 +39,7 @@ public class TestUtils {
         try {
             PostgresConnection conn = new PostgresConnection("localhost", ApiaryConfig.postgresPort, "postgres", "dbos", provenanceDB, provenanceAddr);
         } catch (Exception e) {
-            logger.info("Failed to connect to Postgres.");
+            logger.info("Manav Print the logs Failed to connect to Postgres.");
             return false;
         }
         return true;

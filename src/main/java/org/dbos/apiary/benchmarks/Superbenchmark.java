@@ -41,7 +41,6 @@ public class Superbenchmark {
             conn.dropTable("SuperbenchmarkTable");
             conn.createTable("SuperbenchmarkTable", "ItemID integer PRIMARY KEY NOT NULL, Inventory integer NOT NULL");
         } catch (Exception e) {
-            logger.info("Failed to connect to Postgres.");
         }
         try {
             ElasticsearchClient client = new ElasticsearchConnection(dbAddr, 9200, "elastic", "password").client;
@@ -49,14 +48,12 @@ public class Superbenchmark {
             request = new DeleteIndexRequest.Builder().index("superbenchmark").ignoreUnavailable(true).build();
             client.indices().delete(request);
         } catch (Exception e) {
-            logger.info("Index Not Deleted {}", e.getMessage());
         }
         MongoConnection mconn;
         try {
             mconn = new MongoConnection(dbAddr, ApiaryConfig.mongoPort);
             mconn.database.getCollection("superbenchmark").drop();
         } catch (Exception e) {
-            logger.info("No Mongo instance! {}", e.getMessage());
             return;
         }
 
@@ -83,7 +80,6 @@ public class Superbenchmark {
             }
             client.get().executeFunction("PostgresSBBulkWrite", initialIDs, initialNames, initialCosts, initialInventories);
         }
-        logger.info("Done Loading: {}", System.currentTimeMillis() - loadStart);
 
         if (ApiaryConfig.XDBTransactions) {
             mconn.database.getCollection("superbenchmark").createIndex(Indexes.ascending(MongoContext.beginVersion));
@@ -138,9 +134,7 @@ public class Superbenchmark {
             double throughput = (double) numQueries * 1000.0 / elapsedTime;
             long p50 = queryTimes.get(numQueries / 2);
             long p99 = queryTimes.get((numQueries * 99) / 100);
-            logger.info("Duration: {} Interval: {}μs Queries: {} TPS: {} Average: {}μs p50: {}μs p99: {}μs", elapsedTime, interval, numQueries, String.format("%.03f", throughput), average, p50, p99);
         } else {
-            logger.info("No reads");
         }
 
         queryTimes = writeTimes.stream().map(i -> i / 1000).sorted().collect(Collectors.toList());
@@ -150,14 +144,11 @@ public class Superbenchmark {
             double throughput = (double) numQueries * 1000.0 / elapsedTime;
             long p50 = queryTimes.get(numQueries / 2);
             long p99 = queryTimes.get((numQueries * 99) / 100);
-            logger.info("Duration: {} Interval: {}μs Queries: {} TPS: {} Average: {}μs p50: {}μs p99: {}μs", elapsedTime, interval, numQueries, String.format("%.03f", throughput), average, p50, p99);
         } else {
-            logger.info("No writes");
         }
 
         threadPool.shutdown();
         threadPool.awaitTermination(100000, TimeUnit.SECONDS);
-        logger.info("All queries finished! {}", System.currentTimeMillis() - startTime);
         System.exit(0); // ES client is bugged and won't exit.
     }
 

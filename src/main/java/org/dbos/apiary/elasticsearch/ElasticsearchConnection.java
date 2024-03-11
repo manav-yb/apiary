@@ -61,9 +61,12 @@ public class ElasticsearchConnection implements ApiarySecondaryConnection {
             CertificateFactory factory =
                     CertificateFactory.getInstance("X.509");
             Certificate trustedCa;
+            logger.info("All fine " + caCertificatePath);
             try (InputStream is = Files.newInputStream(caCertificatePath)) {
+                logger.info("Inside nested try block ");
                 trustedCa = factory.generateCertificate(is);
             }
+            logger.info("All ok ");
             KeyStore trustStore = KeyStore.getInstance("pkcs12");
             trustStore.load(null, null);
             trustStore.setCertificateEntry("ca", trustedCa);
@@ -81,14 +84,15 @@ public class ElasticsearchConnection implements ApiarySecondaryConnection {
             // Create the transport with a Jackson mapper
             ElasticsearchTransport transport = new RestClientTransport(
                     restClient, new JacksonJsonpMapper());
-
+            
+            logger.info("All okay at this point "); 
             // And create the API client
             this.client = new ElasticsearchClient(transport);
 
             // Store scripts
             client.putScript(p -> p.id(updateEndVersionScript).script(s -> s.lang("painless").source("ctx._source.endVersion=params['endV']")));
         } catch (CertificateException | IOException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException e) {
-            logger.info("Elasticsearch Connection Failed");
+            logger.info("Manav Elasticsearch Connection Failed");
             throw new RuntimeException("Failed to connect to ElasticSearch");
         }
     }
