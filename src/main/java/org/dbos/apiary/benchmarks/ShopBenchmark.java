@@ -6,7 +6,13 @@ import org.dbos.apiary.client.ApiaryWorkerClient;
 import org.dbos.apiary.elasticsearch.ElasticsearchConnection;
 import org.dbos.apiary.postgres.PostgresConnection;
 import org.dbos.apiary.procedures.elasticsearch.shop.ShopItem;
+import org.dbos.apiary.procedures.postgres.shop.ShopAddItem;
+import org.dbos.apiary.procedures.postgres.shop.ShopBulkAddItem;
+import org.dbos.apiary.procedures.postgres.shop.ShopCheckoutCart;
+import org.dbos.apiary.procedures.postgres.shop.ShopGetItem;
 import org.dbos.apiary.utilities.ApiaryConfig;
+import org.dbos.apiary.worker.ApiaryNaiveScheduler;
+import org.dbos.apiary.worker.ApiaryWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +30,8 @@ import java.util.stream.Collectors;
 public class ShopBenchmark {
     private static final Logger logger = LoggerFactory.getLogger(ShopBenchmark.class);
     private static final int threadPoolSize = 256;
+
+    private static ApiaryWorker apiaryWorker;
 
     private static final int chunksize = 100000;
     private static final int initialItems = 1000000;
@@ -47,14 +55,22 @@ public class ShopBenchmark {
         conn.createTable("ShopOrders", "PersonID integer NOT NULL, OrderID integer NOT NULL, ItemID integer NOT NULL");
         conn.createTable("ShopTransactions", "OrderID integer PRIMARY KEY NOT NULL, PersonID integer NOT NULL, Cost integer NOT NULL");
         conn.createIndex("CREATE INDEX CartIndex ON ShopCart (PersonID);");
-        ElasticsearchClient esClient = new ElasticsearchConnection(dbAddr, 9200, "elastic", "password").client;
-        try {
-            DeleteIndexRequest request = new DeleteIndexRequest.Builder().index("items").build();
-            esClient.indices().delete(request);
-        } catch (Exception e) {
-            logger.info("Index Not Deleted {}", e.getMessage());
-        }
-        esClient.shutdown();
+        // ElasticsearchClient esClient = new ElasticsearchConnection(dbAddr, 9200, "elastic", "password").client;
+        // try {
+        //     DeleteIndexRequest request = new DeleteIndexRequest.Builder().index("items").build();
+        //     esClient.indices().delete(request);
+        // } catch (Exception e) {
+        //     logger.info("Index Not Deleted {}", e.getMessage());
+        // }
+        // esClient.shutdown();
+
+        apiaryWorker = new ApiaryWorker(new ApiaryNaiveScheduler(), 4);
+        apiaryWorker.registerConnection(ApiaryConfig.postgres, conn);
+        apiaryWorker.registerFunction("ShopBulkAddItem", ApiaryConfig.postgres, ShopBulkAddItem::new);
+        apiaryWorker.registerFunction("ShopGetItem", ApiaryConfig.postgres, ShopGetItem::new);
+        apiaryWorker.registerFunction("ShopCheckoutCart", ApiaryConfig.postgres, ShopCheckoutCart::new);
+        apiaryWorker.registerFunction("ShopAddItem", ApiaryConfig.postgres, ShopAddItem::new);
+        apiaryWorker.startServing();
 
         ThreadLocal<ApiaryWorkerClient> client = ThreadLocal.withInitial(() -> new ApiaryWorkerClient("localhost"));
 
@@ -63,6 +79,7 @@ public class ShopBenchmark {
         List<String> searchPhrasesList = new ArrayList<>();
         assert (initialItems % chunksize == 0);
         int numChunks = initialItems / chunksize;
+        logger.info("Start loading for " + numChunks + " number of iteration");
         for (int chunkNum = 0; chunkNum < numChunks; chunkNum++) {
             int[] itemIDs = new int[chunksize];
             String[] itemNames = new String[chunksize];
@@ -142,7 +159,7 @@ public class ShopBenchmark {
             double throughput = (double) numQueries * 1000.0 / elapsedTime;
             long p50 = queryTimes.get(numQueries / 2);
             long p99 = queryTimes.get((numQueries * 99) / 100);
-            logger.info("Cart Operations: Duration: {} Interval: {}μs Queries: {} TPS: {} Average: {}μs p50: {}μs p99: {}μs", elapsedTime, interval, numQueries, String.format("%.03f", throughput), average, p50, p99);
+            logger.info("Cart Operations: Duration: {} Interval: {} Queries: {} TPS: {} Average: {} p50: {} p99: {} ", elapsedTime, interval, numQueries, String.format("%.03f", throughput), average, p50, p99);
         } else {
             logger.info("No cart operations");
         }
@@ -154,7 +171,7 @@ public class ShopBenchmark {
             double throughput = (double) numQueries * 1000.0 / elapsedTime;
             long p50 = queryTimes.get(numQueries / 2);
             long p99 = queryTimes.get((numQueries * 99) / 100);
-            logger.info("Catalog Updates: Duration: {} Interval: {}μs Queries: {} TPS: {} Average: {}μs p50: {}μs p99: {}μs", elapsedTime, interval, numQueries, String.format("%.03f", throughput), average, p50, p99);
+            logger.info("Catalog Updates: Duration: {} Interval: {} Queries: {} TPS: {} Average: {} p50: {} p99: {}", elapsedTime, interval, numQueries, String.format("%.03f", throughput), average, p50, p99);
         } else {
             logger.info("No catalog Updates");
         }

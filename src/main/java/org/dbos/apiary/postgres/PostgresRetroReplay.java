@@ -65,13 +65,10 @@ public class PostgresRetroReplay {
         long startTime = System.currentTimeMillis();
         Set<String> nonSkipFuncs = workerContext.listAllFunctions();
         if (replayMode == ApiaryConfig.ReplayMode.ALL.getValue()) {
-            logger.debug("Replay the entire trace!");
         } else if (replayMode == ApiaryConfig.ReplayMode.SELECTIVE.getValue()) {
-            logger.debug("Selective replay!");
             // Get a list of functions that must be executed.
             nonSkipFuncs = getExecFuncSets(workerContext);
         } else {
-            logger.error("Do not support replay mode: {}", replayMode);
             return null;
         }
 
@@ -88,7 +85,6 @@ public class PostgresRetroReplay {
         long startTxId = -1;
         if (historyRs.next()) {
             startTxId = historyRs.getLong(ProvenanceBuffer.PROV_APIARY_TRANSACTION_ID);
-            logger.debug("Replay start transaction ID: {}", startTxId);
         } else {
             logger.error("No corresponding original transaction for start execution {}", targetExecID);
             throw new RuntimeException("Cannot find original transaction!");
@@ -102,7 +98,6 @@ public class PostgresRetroReplay {
         long endTxId = Long.MAX_VALUE;
         if (endRs.next()) {
             endTxId = endRs.getLong(ProvenanceBuffer.PROV_APIARY_TRANSACTION_ID);
-            logger.debug("Replay end transaction ID (excluded): {}", endTxId);
         } else {
             logger.debug("No corresponding original transaction for end execution {}. Execute the entire trace!", endExecId);
         }
@@ -176,7 +171,6 @@ public class PostgresRetroReplay {
         ExecutorService commitThreadPool = Executors.newCachedThreadPool();
 
         long prepTime = System.currentTimeMillis();
-        logger.info("Prepare time: {} ms", prepTime - startTime);
 
         // Main loop: start based on the transaction ID order and the snapshot info, Postgres commit timestamp may not be reliable.
         // Start transactions based on their original txid order, but commit it before executing the first transaction that has it in the snapshot.
@@ -540,7 +534,6 @@ public class PostgresRetroReplay {
             }
             restFunctions.removeAll(newFuncs);
         }
-        logger.info("Selective replay must execute these functions: {}", execFuncs.toString());
         return execFuncs;
     }
 
@@ -552,7 +545,6 @@ public class PostgresRetroReplay {
             double throughput = (double) numQueries * 1000.0 / elapsedTime;
             long p50 = queryTimes.get(numQueries / 2);
             long p99 = queryTimes.get((numQueries * 99) / 100);
-            logger.debug("[{}]: Duration: {}  Operations: {} Op/sec: {} Average: {}μs p50: {}μs p99: {}μs", opName, elapsedTime, numQueries, String.format("%.03f", throughput), average, p50, p99);
         } else {
             logger.debug("No {}.", opName);
         }

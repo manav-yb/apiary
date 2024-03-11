@@ -7,8 +7,8 @@ SCRIPT_DIR=$(dirname $(realpath $0))
 docker pull postgres:14.5-bullseye
 
 PGCONFIG=""  # Postgres config file.
-NAME="apiary-postgres"
-PORT=5432
+NAME="apiary-prov"
+PORT=5433
 if [[ $# -eq 1 ]]; then
     PGCONFIG="$PWD/$1"
 fi
@@ -21,7 +21,7 @@ fi
 
 # Set the password to dbos, default user is postgres.
 if [[ -z "$PGCONFIG" ]]; then
-    docker run -p 5432:5432 -d --rm --name="$NAME" --env PGDATA=/var/lib/postgresql-static/data --env POSTGRES_PASSWORD=dbos postgres:14.5-bullseye
+    docker run -p 5433:5432 -d --rm --name="$NAME" --env PGDATA=/var/lib/postgresql-static/data --env POSTGRES_PASSWORD=dbos postgres:14.5-bullseye
 else
     # Use customized config file
     docker run -d --rm --name="$NAME" --env PGDATA=/var/lib/postgresql-static/data --env POSTGRES_PASSWORD=dbos \

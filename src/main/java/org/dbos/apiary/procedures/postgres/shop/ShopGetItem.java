@@ -9,7 +9,7 @@ import java.sql.SQLException;
 public class ShopGetItem extends PostgresFunction {
 
     public static int runFunction(PostgresContext ctxt, int personID, String searchText, int maxCost) throws Exception {
-        String[] items = ctxt.apiaryCallFunction("ShopESSearchItem", searchText, maxCost).getStringArray();
+        String[] items = {};//ctxt.apiaryCallFunction("ShopESSearchItem", searchText, maxCost).getStringArray();
         if (items.length > 0) {
             int bestItem = Integer.parseInt(items[0]);
             ctxt.apiaryCallFunction("ShopAddCart", personID, bestItem);

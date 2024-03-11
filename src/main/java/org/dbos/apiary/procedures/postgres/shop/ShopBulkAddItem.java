@@ -12,7 +12,7 @@ public class ShopBulkAddItem extends PostgresFunction {
         for (int i = 0; i < itemIDs.length; i++) {
             ctxt.executeUpdate(addItem, itemIDs[i], itemNames[i], itemDescs[i], costs[i], inventories[i]);
         }
-        ctxt.apiaryCallFunction("ShopESBulkAddItem", itemIDs, itemNames, itemDescs, costs);
+        // ctxt.apiaryCallFunction("ShopESBulkAddItem", itemIDs, itemNames, itemDescs, costs);
         return 0;
     }
 }

@@ -19,7 +19,6 @@ public class ElasticsearchUtilities {
                 s.query().forEach(stack::push);
                 while (!stack.empty()) {
                     QueryProfile q = stack.pop();
-                    logger.info("{} {} Runtime: {}μs", q.type(), q.description(), q.timeInNanos() / 1000);
                     q.children().forEach(stack::push);
                 }
             }
